@@ -2,15 +2,16 @@
 
 #include "DataRequestHandler.h"
 
-#include <iostream>
-#include <memory>
-#include <string>
 #include <utility>
+#include <iostream>
+#include <string>
+#include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 
 #include "../../Server/HTTPSession.h"
+#include "../Data/DummyDataHandler.h"
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -28,8 +29,18 @@ DataRequestHandler::~DataRequestHandler() {
 }
 
 http::response<http::string_body>* DataRequestHandler::HandleRequest() {
-    // Create a simple "Hello, World!" response.
-    std::string body = "I am a data request handler. You requested data for " + name + ".";
+    DummyDataHandler data_handler(10, 2);
+    arma::vec future = data_handler.LeastSquaresPreditct(5);
+    arma::vec data = data_handler.GetDataVector(1);
+    std::string body = "Past values: ";
+    for (int i = 0; i < data.n_elem; i++) {
+        body += std::to_string(data(i)) + " ";
+    }
+    body += "\n";
+    body += "Predicted values: ";
+    for (int i = 0; i < future.n_elem; i++) {
+        body += std::to_string(future(i)) + " ";
+    }
     res_ = new http::response<http::string_body>(http::status::ok, req_.version());
     res_->set(http::field::server, "Boost.Beast");
     res_->set(http::field::content_type, "text/plain");

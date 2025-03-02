@@ -5,12 +5,14 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "../Handlers/Requests/DataRequestHandler.h"
 
-HTTPSession::HTTPSession(tcp::socket socket)
-    : socket_(std::move(socket)) {
-    std::cout << "New HTTP session started." << std::endl;
+HTTPSession::HTTPSession(tcp::socket socket, std::vector<std::string> valid_technologies,
+    std::vector<std::string> valid_companies)
+    : socket_(std::move(socket)), valid_technologies_(valid_technologies),
+    valid_companies_(valid_companies) {
 }
 
 void HTTPSession::Run() {
@@ -43,8 +45,45 @@ void HTTPSession::HandleRequest() {
         std::cout << "Invalid target: " << req_.target() << std::endl;
         SendBadRequest("Invalid target");
         return;
+    } else if (req_.target().find("/data/technology/") == 0) {
+        std::string technology = req_.target().substr(17);
+        if (!IsValidTechnology(technology)) {
+            std::cout << "Invalid technology: " << technology << std::endl;
+            SendBadRequest("Invalid technology");
+            return;
+        }
     } else if (req_.target().find("/data/") == 0) {
-        std::cout << "Data request: " << req_.target() << std::endl;
+        std::string company = req_.target().substr(6);
+        std::string technology = company;
+        for (int i = 0; i < company.size(); i++) {
+            if (company[i] == '/') {
+                company = company.substr(0, i);
+                technology = technology.substr(i+1);
+                break;
+            }
+        }
+        std::cout << "Company: " << company << std::endl;
+        std::cout << "Technology: " << technology << std::endl;
+        if (!IsValidTechnology(technology)) {
+            std::cout << "Invalid technology: " << technology << std::endl;
+            SendBadRequest("Invalid technology");
+            std::cout << "Valid technologies: ";
+            for (std::string valid_technology : valid_technologies_) {
+                std::cout << valid_technology << " ";
+            }
+            std::cout << std::endl;
+            return;
+        }
+        if (!IsValidCompany(company)) {
+            std::cout << "Invalid company: " << company << std::endl;
+            SendBadRequest("Invalid company");
+            std::cout << "Valid companies: ";
+            for (std::string valid_company : valid_companies_) {
+                std::cout << valid_company << " ";
+            }
+            std::cout << std::endl;
+            return;
+        }
     } else {
         std::cout << "Unknown request: " << req_.target() << std::endl;
         SendBadRequest("Unknown request");
@@ -66,4 +105,22 @@ void HTTPSession::SendBadRequest(const std::string &why) {
     res.body() = why;
     res.prepare_payload();
     DoWrite(std::move(res));
+}
+
+bool HTTPSession::IsValidTechnology(std::string technology) {
+    for (std::string valid_technology : valid_technologies_) {
+        if (technology == valid_technology) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool HTTPSession::IsValidCompany(std::string company) {
+    for (std::string valid_company : valid_companies_) {
+        if (company == valid_company) {
+            return true;
+        }
+    }
+    return false;
 }

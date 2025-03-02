@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <utility>
+#include <vector>
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -20,7 +21,8 @@ using tcp = asio::ip::tcp;
 class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
  public:
     // Constructor: takes ownership of the socket.
-    explicit HTTPSession(tcp::socket socket);
+    explicit HTTPSession(tcp::socket socket, std::vector<std::string> valid_technologies,
+        std::vector<std::string> valid_companies);
 
     void Run();
 
@@ -28,6 +30,8 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
     tcp::socket socket_;
     beast::flat_buffer buffer_;             // Buffer for reading
     http::request<http::string_body> req_;  // Container for the HTTP request
+    std::vector<std::string> valid_technologies_;
+    std::vector<std::string> valid_companies_;
 
     // Asynchronously read an HTTP request.
     void DoRead();
@@ -37,6 +41,9 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
 
     // Helper to send a bad request response.
     void SendBadRequest(const std::string& why);
+
+    bool IsValidTechnology(std::string technology);
+    bool IsValidCompany(std::string company);
 
     // Asynchronously write the response.
     // This is a template so it can handle different response types.

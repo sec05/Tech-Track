@@ -9,7 +9,7 @@
 int main() {
     try {
         boost::asio::io_context* io_context =  new boost::asio::io_context;
-        Server server(io_context, 8008);  // Listening on port 12345
+        Server server(io_context, 8008, "config");
         io_context->run();
     }
     catch (std::exception& e) {
