@@ -9,6 +9,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
+#include <boost/json.hpp>
 
 #include "../../Server/HTTPSession.h"
 #include "../Data/DummyDataHandler.h"
@@ -25,22 +26,25 @@ DataRequestHandler::DataRequestHandler
     }
 
 DataRequestHandler::~DataRequestHandler() {
-    free(res_);
+    delete res_;
 }
 
 http::response<http::string_body>* DataRequestHandler::HandleRequest() {
     DummyDataHandler data_handler(10, 2);
     arma::vec future = data_handler.LeastSquaresPreditct(5);
     arma::vec data = data_handler.GetDataVector(1);
-    std::string body = "Past values: ";
+    boost::json::object response_json;
+    boost::json::array data_json;
+    boost::json::array future_json;
     for (int i = 0; i < data.n_elem; i++) {
-        body += std::to_string(data(i)) + " ";
+        data_json.push_back(data(i));
     }
-    body += "\n";
-    body += "Predicted values: ";
     for (int i = 0; i < future.n_elem; i++) {
-        body += std::to_string(future(i)) + " ";
+        future_json.push_back(future(i));
     }
+    response_json["data"] = data_json;
+    response_json["future"] = future_json;
+    std::string body = boost::json::serialize(response_json);
     res_ = new http::response<http::string_body>(http::status::ok, req_.version());
     res_->set(http::field::server, "Boost.Beast");
     res_->set(http::field::content_type, "text/plain");

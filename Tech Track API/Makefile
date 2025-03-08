@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -I/opt/homebrew/include -Wall -Wextra -O2
-LDFLAGS = -L/opt/homebrew/lib -lboost_system -lboost_thread -lpthread -larmadillo -v
+LDFLAGS = -L/opt/homebrew/lib -lboost_system -lboost_thread -lboost_json -lpthread -larmadillo -v
 
 SRC_DIR = .
 BUILD_DIR = build
