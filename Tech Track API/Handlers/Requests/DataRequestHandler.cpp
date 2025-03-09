@@ -13,6 +13,7 @@
 
 #include "../../Server/HTTPSession.h"
 #include "../Data/DummyDataHandler.h"
+#include "../../Models/NLLS/Predictor.h"
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -31,19 +32,18 @@ DataRequestHandler::~DataRequestHandler() {
 
 http::response<http::string_body>* DataRequestHandler::HandleRequest() {
     DummyDataHandler data_handler(10, 2);
-    arma::vec future = data_handler.LeastSquaresPreditct(5);
-    arma::vec data = data_handler.GetDataVector(1);
     boost::json::object response_json;
     boost::json::array data_json;
     boost::json::array future_json;
-    for (int i = 0; i < data.n_elem; i++) {
-        data_json.push_back(data(i));
+    Predictor predictor(10, 0, 10);
+    double times[10] = {11,12,13,14};
+    double* results = predictor.Predict(times, 4);
+    for (int i = 0; i < 4; i++) {
+        future_json.push_back(results[i]);
     }
-    for (int i = 0; i < future.n_elem; i++) {
-        future_json.push_back(future(i));
-    }
-    response_json["data"] = data_json;
-    response_json["future"] = future_json;
+   
+    response_json["predicted times"] = data_json;
+    response_json["predicted values"] = future_json;
     std::string body = boost::json::serialize(response_json);
     res_ = new http::response<http::string_body>(http::status::ok, req_.version());
     res_->set(http::field::server, "Boost.Beast");
@@ -58,5 +58,5 @@ http::response<http::string_body>* DataRequestHandler::HandleRequest() {
 void DataRequestHandler::ParseRequest() {
     // Parse the request to extract the name.
     std::string request = req_.target();
-    name = request.substr(6);
+    name_ = request.substr(6);
 }
