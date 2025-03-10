@@ -1,3 +1,4 @@
+// Copyright 2025 Spencer Evans-Cole
 #include "Solver.h"
 
 #include <armadillo>
@@ -33,12 +34,12 @@ void Solver::ComputeResiduals(const arma::dvec& coeff) {
 }
 arma::vec Solver::Solve(int max_iterations, double tolerance) {
     int N = data_.n_rows;
-    int M = 4; // Number of coefficients
+    int M = 4;  // Number of coefficients
     coeff_ = arma::ones<arma::dvec>(M);
-    coeff_(0) = 1.0; // Initial guess for a
-    coeff_(1) = 2.0; // Initial guess for b
-    coeff_(2) = 3.0; // Initial guess for c
-    coeff_(3) = 4.0; // Initial guess for d
+    coeff_(0) = 1.0;  // Initial guess for a
+    coeff_(1) = 2.0;  // Initial guess for b
+    coeff_(2) = 3.0;  // Initial guess for c
+    coeff_(3) = 4.0;  // Initial guess for d
     // Initialize residuals and Jacobian
     residuals_ = arma::zeros<arma::dvec>(N);
     J_ = arma::zeros<arma::dmat>(N, M);
@@ -49,7 +50,8 @@ arma::vec Solver::Solve(int max_iterations, double tolerance) {
 
         arma::dvec delta = arma::solve(J_.t() * J_, -J_.t() * residuals_);
         coeff_ += delta;
-        printf("Iteration %d: Coefficients: %f, %f, %f, %f\n", iter, coeff_(0), coeff_(1), coeff_(2), coeff_(3));
+        printf("Iteration %d: Coefficients: %f, %f, %f, %f\n",
+             iter, coeff_(0), coeff_(1), coeff_(2), coeff_(3));
         printf("Residuals: %f\n", arma::norm(residuals_));
         printf("Delta: %f\n", arma::norm(delta));
         // Check for convergence

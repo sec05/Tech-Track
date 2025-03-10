@@ -14,6 +14,8 @@
 #include "../../Server/HTTPSession.h"
 #include "../Data/DummyDataHandler.h"
 #include "../../Models/NLLS/Predictor.h"
+#include "../../Models/NLLS/DummyDataGenerator.h"
+#include "../../Models/LSTM/Network.h"
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -36,12 +38,19 @@ http::response<http::string_body>* DataRequestHandler::HandleRequest() {
     boost::json::array data_json;
     boost::json::array future_json;
     Predictor predictor(10, 0, 10);
-    double times[10] = {11,12,13,14};
-    double* results = predictor.Predict(times, 4);
+    double times[10] = {11, 12, 13, 14};
+    DummyDataGenerator generator(10, 0, 10);
+    dmat data_multiple = generator.GenerateSinusoidalDataMultipleCompanies(1, 2, 3, 4, 1, 1, 10);
+    LSTMNetwork lstm(10, 20, 1);
+    lstm.Forward(data_multiple);
+    dvec output = lstm.GetOutput();
+   /* double* results = predictor.Predict(times, 4);
     for (int i = 0; i < 4; i++) {
         future_json.push_back(results[i]);
+    }*/
+    for (int i = 0; i < output.n_elem; i++) {
+        future_json.push_back(output[i]);
     }
-   
     response_json["predicted times"] = data_json;
     response_json["predicted values"] = future_json;
     std::string body = boost::json::serialize(response_json);

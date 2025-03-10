@@ -93,7 +93,8 @@ void HTTPSession::HandleRequest() {
     DataRequestHandler handler(std::move(req_), shared_from_this());
 
     http::response<http::string_body>* res = handler.HandleRequest();
-
+    printf("Response: %s\n", res->body().c_str());
+    // Send the response back to the client.
     DoWrite(std::move(*res));
 }
 

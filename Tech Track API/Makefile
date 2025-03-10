@@ -1,11 +1,11 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -I/opt/homebrew/include -Wall -Wextra -O2
-LDFLAGS = -L/opt/homebrew/lib -lboost_system -lboost_thread -lboost_json -lpthread -larmadillo -v
+CXXFLAGS = -std=c++17 -I/opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3 -I/opt/homebrew/include -Wall -Wextra -O2
+LDFLAGS = -L/opt/homebrew/lib -lboost_thread -lboost_json -lpthread -larmadillo -v
 
 SRC_DIR = .
 BUILD_DIR = build
 BIN = TechTrackAPI.out
-SRCS = $(wildcard Server/*.cpp Handlers/*/*.cpp main.cpp)
+SRCS = $(wildcard Server/*.cpp Handlers/*/*.cpp Models/*/*.cpp main.cpp)
 OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
 $(BIN): $(OBJS)
