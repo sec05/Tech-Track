@@ -13,6 +13,7 @@ HTTPSession::HTTPSession(tcp::socket socket, std::vector<std::string> valid_tech
     std::vector<std::string> valid_companies)
     : socket_(std::move(socket)), valid_technologies_(valid_technologies),
     valid_companies_(valid_companies) {
+        valid_companies_.push_back("all");
 }
 
 void HTTPSession::Run() {
@@ -45,15 +46,8 @@ void HTTPSession::HandleRequest() {
         std::cout << "Invalid target: " << req_.target() << std::endl;
         SendBadRequest("Invalid target");
         return;
-    } else if (req_.target().find("/data/technology/") == 0) {
-        std::string technology = req_.target().substr(17);
-        if (!IsValidTechnology(technology)) {
-            std::cout << "Invalid technology: " << technology << std::endl;
-            SendBadRequest("Invalid technology");
-            return;
-        }
-    } else if (req_.target().find("/data/") == 0) {
-        std::string company = req_.target().substr(6);
+    } else  {
+        std::string company = req_.target().substr(1);
         std::string technology = company;
         for (int i = 0; i < company.size(); i++) {
             if (company[i] == '/') {
@@ -62,8 +56,9 @@ void HTTPSession::HandleRequest() {
                 break;
             }
         }
-        std::cout << "Company: " << company << std::endl;
-        std::cout << "Technology: " << technology << std::endl;
+        company_ = company;
+        technology_ = technology;
+
         if (!IsValidTechnology(technology)) {
             std::cout << "Invalid technology: " << technology << std::endl;
             SendBadRequest("Invalid technology");
@@ -84,18 +79,19 @@ void HTTPSession::HandleRequest() {
             std::cout << std::endl;
             return;
         }
-    } else {
+    DataRequestHandler handler(std::move(req_), shared_from_this());
+
+    http::response<http::string_body>* res = new http::response<http::string_body>(
+        http::status::ok, req_.version());
+    printf("Response: %s\n", res->body().c_str());
+    // Send the response back to the client.
+    printf("Sending response to client\n");
+    DoWrite(std::move(*res));
+    return;
+    }
         std::cout << "Unknown request: " << req_.target() << std::endl;
         SendBadRequest("Unknown request");
         return;
-    }
-
-    DataRequestHandler handler(std::move(req_), shared_from_this());
-
-    http::response<http::string_body>* res = handler.HandleRequest();
-    printf("Response: %s\n", res->body().c_str());
-    // Send the response back to the client.
-    DoWrite(std::move(*res));
 }
 
 void HTTPSession::SendBadRequest(const std::string &why) {

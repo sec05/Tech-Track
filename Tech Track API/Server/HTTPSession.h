@@ -25,14 +25,16 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
         std::vector<std::string> valid_companies);
 
     void Run();
-
+    std::string GetCompany() const { return company_; }
+    std::string GetTechnology() const { return technology_; }
  private:
     tcp::socket socket_;
     beast::flat_buffer buffer_;             // Buffer for reading
     http::request<http::string_body> req_;  // Container for the HTTP request
     std::vector<std::string> valid_technologies_;
     std::vector<std::string> valid_companies_;
-
+    std::string company_;
+    std::string technology_;  // Company and technology from the request target
     // Asynchronously read an HTTP request.
     void DoRead();
 
@@ -64,6 +66,8 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
                 socket_.shutdown(tcp::socket::shutdown_send, ec_shutdown);
             });
     }
+
+
 };
 
 #endif  // TECH_TRACK_API_SERVER_HTTPSESSION_H_

@@ -11,14 +11,14 @@ with open("config", "r") as f:
     
     for technology in technologies:
         for company in companies:
-            url = f"http://localhost:8008/data/{company}/{technology}"
+            url = f"http://localhost:8008/{company}/{technology}"
             response = requests.get(url)
             if response.status_code == 200:
                 print(f"Success: {url}")
             else:
                 print(f"Failure: {url}")
     for technology in technologies:
-        url = f"http://localhost:8008/data/technology/{technology}"
+        url = f"http://localhost:8008/all/{technology}"
         response = requests.get(url)
         if response.status_code == 200:
             print(f"Success: {url}")
