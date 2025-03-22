@@ -13,9 +13,9 @@
 
 #include "../../Server/HTTPSession.h"
 #include "../Data/DummyDataHandler.h"
-#include "../../Models/NLLS/Predictor.h"
-#include "../../Models/NLLS/DummyDataGenerator.h"
-#include "../../Models/LSTM/Network.h"
+#include "../../Prediction/NLLS/Predictor.h"
+#include "../../Prediction/NLLS/DummyDataGenerator.h"
+#include "../../Prediction/LSTM/Network.h"
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -46,7 +46,7 @@ http::response<http::string_body> *DataRequestHandler::HandleRequest()
     boost::json::object response_json;
     boost::json::array data_json;
     boost::json::array future_json;
-   /*
+   
    if (company_ == "all")
     {
         DummyDataGenerator generator(10, 0, 10);
@@ -56,6 +56,7 @@ http::response<http::string_body> *DataRequestHandler::HandleRequest()
         dvec output = lstm.GetOutput();
         for (int i = 0; i < output.n_elem; i++)
         {
+            data_json.push_back(i+1);
             future_json.push_back(output[i]);
         }
     }
@@ -67,6 +68,7 @@ http::response<http::string_body> *DataRequestHandler::HandleRequest()
         for (int i = 0; i < 4; i++)
         {
             future_json.push_back(output[i]);
+            data_json.push_back(times[i]);
         }
     }
 
@@ -75,9 +77,9 @@ http::response<http::string_body> *DataRequestHandler::HandleRequest()
     std::string body = boost::json::serialize(response_json);
     res_->set(http::field::server, "Boost.Beast");
     res_->set(http::field::content_type, "text/plain");
-    res_->keep_alive(req_.keep_alive());
+    res_->keep_alive(GetRequest().keep_alive());
     res_->body() = body;
-    */
+
     res_->prepare_payload();
 
     return res_;

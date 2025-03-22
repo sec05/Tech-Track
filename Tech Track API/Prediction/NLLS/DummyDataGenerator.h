@@ -14,6 +14,8 @@ class DummyDataGenerator {
         arma::mat GenerateSinusoidalDataMultipleCompanies(
             double a, double b, double c, double d,
             double mean, double stddev, int num_companies);
+        
+        arma::dvec GetTimes() const { return data_.col(0); }
  private:
         int numberPoints_;
         arma::mat data_;
