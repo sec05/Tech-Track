@@ -25,7 +25,9 @@ class DataRequestHandler : public RequestHandler {
 
     void ParseRequest() override;
  private:
-    std::string name_;
+    std::string technology_;
+    std::string company_;
+    http::response<http::string_body>* res_;
 };
 
 #endif  // TECH_TRACK_API_HANDLERS_REQUESTS_DATAREQUESTHANDLER_H_

@@ -22,50 +22,71 @@ namespace http = beast::http;
 namespace net = boost::asio;
 using tcp = net::ip::tcp;
 
-DataRequestHandler::DataRequestHandler
-        (http::request<http::string_body>&& req, std::shared_ptr<HTTPSession> session)
-        : RequestHandler(std::move(req), std::move(session)) {
-            ParseRequest();
-    }
-
-DataRequestHandler::~DataRequestHandler() {
-    delete res_;
+DataRequestHandler::DataRequestHandler(http::request<http::string_body> &&req, std::shared_ptr<HTTPSession> session)
+    : RequestHandler(std::move(req), std::move(session)), res_(nullptr), company_(""), technology_("")
+{
+ ParseRequest();
+ res_ = new http::response<http::string_body>(http::status::ok, GetRequest().version());
 }
 
-http::response<http::string_body>* DataRequestHandler::HandleRequest() {
+DataRequestHandler::~DataRequestHandler()
+{
+   if (res_ != nullptr)
+    {
+        delete res_;
+    }
+    res_ = nullptr;
+    company_ = "";
+    technology_ = "";
+}
+
+http::response<http::string_body> *DataRequestHandler::HandleRequest()
+{
     DummyDataHandler data_handler(10, 2);
     boost::json::object response_json;
     boost::json::array data_json;
     boost::json::array future_json;
-    Predictor predictor(10, 0, 10);
-    double times[10] = {11, 12, 13, 14};
-    DummyDataGenerator generator(10, 0, 10);
-    dmat data_multiple = generator.GenerateSinusoidalDataMultipleCompanies(1, 2, 3, 4, 1, 1, 10);
-    LSTMNetwork lstm(10, 20, 1);
-    lstm.Forward(data_multiple);
-    dvec output = lstm.GetOutput();
-   /* double* results = predictor.Predict(times, 4);
-    for (int i = 0; i < 4; i++) {
-        future_json.push_back(results[i]);
-    }*/
-    for (int i = 0; i < output.n_elem; i++) {
-        future_json.push_back(output[i]);
+   /*
+   if (company_ == "all")
+    {
+        DummyDataGenerator generator(10, 0, 10);
+        dmat data_multiple = generator.GenerateSinusoidalDataMultipleCompanies(1, 2, 3, 4, 1, 1, 10);
+        LSTMNetwork lstm(10, 20, 1);
+        lstm.Forward(data_multiple);
+        dvec output = lstm.GetOutput();
+        for (int i = 0; i < output.n_elem; i++)
+        {
+            future_json.push_back(output[i]);
+        }
     }
+    else
+    {
+        Predictor predictor(10, 0, 10);
+        double times[10] = {11, 12, 13, 14};
+        double* output = predictor.Predict(times, 4);
+        for (int i = 0; i < 4; i++)
+        {
+            future_json.push_back(output[i]);
+        }
+    }
+
     response_json["predicted times"] = data_json;
     response_json["predicted values"] = future_json;
     std::string body = boost::json::serialize(response_json);
-    res_ = new http::response<http::string_body>(http::status::ok, req_.version());
     res_->set(http::field::server, "Boost.Beast");
     res_->set(http::field::content_type, "text/plain");
     res_->keep_alive(req_.keep_alive());
     res_->body() = body;
+    */
     res_->prepare_payload();
 
     return res_;
 }
 
-void DataRequestHandler::ParseRequest() {
+void DataRequestHandler::ParseRequest()
+{
     // Parse the request to extract the name.
-    std::string request = req_.target();
-    name_ = request.substr(6);
+    std::string request = GetRequest().target();
+    company_ = GetSession()->GetCompany();
+    technology_ = GetSession()->GetTechnology();
 }

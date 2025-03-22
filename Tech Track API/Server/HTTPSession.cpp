@@ -79,7 +79,7 @@ void HTTPSession::HandleRequest() {
             std::cout << std::endl;
             return;
         }
-    DataRequestHandler handler(std::move(req_), shared_from_this());
+    DataRequestHandler handler = DataRequestHandler(std::move(req_), shared_from_this());
 
     http::response<http::string_body>* res = new http::response<http::string_body>(
         http::status::ok, req_.version());
