@@ -27,6 +27,7 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
     void Run();
     std::string GetCompany() const { return company_; }
     std::string GetTechnology() const { return technology_; }
+
  private:
     tcp::socket socket_;
     beast::flat_buffer buffer_;             // Buffer for reading
@@ -66,8 +67,6 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
                 socket_.shutdown(tcp::socket::shutdown_send, ec_shutdown);
             });
     }
-
-
 };
 
 #endif  // TECH_TRACK_API_SERVER_HTTPSESSION_H_

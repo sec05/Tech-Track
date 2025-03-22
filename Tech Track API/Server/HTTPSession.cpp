@@ -13,7 +13,7 @@ HTTPSession::HTTPSession(tcp::socket socket, std::vector<std::string> valid_tech
     std::vector<std::string> valid_companies)
     : socket_(std::move(socket)), valid_technologies_(valid_technologies),
     valid_companies_(valid_companies) {
-        valid_companies_.push_back("all");
+    valid_companies_.push_back("all");
 }
 
 void HTTPSession::Run() {
@@ -23,80 +23,82 @@ void HTTPSession::Run() {
 
 void HTTPSession::DoRead() {
     auto self = shared_from_this();
+
     // Asynchronously read the HTTP request from the socket into req_.
     http::async_read(socket_, buffer_, req_,
-                     [this, self](beast::error_code ec, std::size_t bytes_transferred) {
-                         boost::ignore_unused(bytes_transferred);
-                         if (!ec) {
-                             // Process the request once it has been fully read.
-                             HandleRequest();
-                         } else {
-                             std::cerr << "Read error: " << ec.message() << std::endl;
-                         }
-                     });
+        [this, self](beast::error_code ec, std::size_t bytes_transferred){
+            boost::ignore_unused(bytes_transferred);
+            if (!ec) {
+                // Process the request once it has been fully read.
+                HandleRequest();
+            } else {
+                std::cerr << "Read error: " << ec.message() << std::endl;
+            }
+        });
 }
 
 void HTTPSession::HandleRequest() {
-    // For this example, we only support GET requests.
+    // Check if the request is valid and parse the target
     if (req_.method() != http::verb::get) {
-        std::cout << "Unsupported HTTP-method: " << req_.method_string() << std::endl;
         SendBadRequest("Unsupported HTTP-method");
         return;
     } else if (req_.target().empty() || req_.target()[0] != '/') {
-        std::cout << "Invalid target: " << req_.target() << std::endl;
         SendBadRequest("Invalid target");
         return;
-    } else  {
+    } else {
+        // Parse the target to extract company and technology
+        // The target is expected to be in the format "/company/technology"
+
         std::string company = req_.target().substr(1);
         std::string technology = company;
-        for (int i = 0; i < company.size(); i++) {
+        for (size_t i = 0; i < company.size(); i++) {
             if (company[i] == '/') {
                 company = company.substr(0, i);
-                technology = technology.substr(i+1);
+                technology = technology.substr(i + 1);
                 break;
             }
         }
         company_ = company;
         technology_ = technology;
 
-        if (!IsValidTechnology(technology)) {
-            std::cout << "Invalid technology: " << technology << std::endl;
-            SendBadRequest("Invalid technology");
-            std::cout << "Valid technologies: ";
-            for (std::string valid_technology : valid_technologies_) {
-                std::cout << valid_technology << " ";
-            }
-            std::cout << std::endl;
-            return;
+        //  handle spaces in names
+        size_t pos = 0;
+        while ((pos = company_.find("%20", pos)) != std::string::npos) {
+            company_.replace(pos, 3, " ");
+            pos += 1;
         }
-        if (!IsValidCompany(company)) {
-            std::cout << "Invalid company: " << company << std::endl;
-            SendBadRequest("Invalid company");
-            std::cout << "Valid companies: ";
-            for (std::string valid_company : valid_companies_) {
-                std::cout << valid_company << " ";
-            }
-            std::cout << std::endl;
-            return;
+        pos = 0;
+        while ((pos = technology_.find("%20", pos)) != std::string::npos) {
+            technology_.replace(pos, 3, " ");
+            pos += 1;
         }
-    DataRequestHandler handler = DataRequestHandler(std::move(req_), shared_from_this());
 
-    http::response<http::string_body>* res = new http::response<http::string_body>(
-        http::status::ok, req_.version());
-    printf("Response: %s\n", res->body().c_str());
-    // Send the response back to the client.
-    printf("Sending response to client\n");
-    DoWrite(std::move(*res));
-    return;
-    }
-        std::cout << "Unknown request: " << req_.target() << std::endl;
-        SendBadRequest("Unknown request");
+        //  validate technology and company
+
+        if (!IsValidTechnology(technology_)) {
+            SendBadRequest("Invalid technology");
+            return;
+        }
+        if (!IsValidCompany(company_)) {
+            SendBadRequest("Invalid company");
+            return;
+        }
+
+        // now pass off to the request to the data request handler
+        DataRequestHandler handler = DataRequestHandler(std::move(req_), shared_from_this());
+
+        http::response<http::string_body>* res = handler.HandleRequest();
+
+        DoWrite(std::move(*res));
         return;
+    }
+    SendBadRequest("Unknown request");
+    return;
 }
 
-void HTTPSession::SendBadRequest(const std::string &why) {
+void HTTPSession::SendBadRequest(const std::string& why) {
     // Build a bad request response with the provided reason.
-    http::response<http::string_body> res{http::status::bad_request, req_.version()};
+    http::response<http::string_body> res{ http::status::bad_request, req_.version() };
     res.set(http::field::content_type, "text/plain");
     res.keep_alive(req_.keep_alive());
     res.body() = why;
