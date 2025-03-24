@@ -1,11 +1,21 @@
+# Makefile for building the TechTrackAPI project
+# You must have aramadillo and Boost libraries installed
+# https://arma.sourceforge.net/
+# https://www.boost.org/
 CXX = g++
-CXXFLAGS = -std=c++17 -I/opt/homebrew/Cellar/eigen/3.4.0_1/include/eigen3 -I/opt/homebrew/include -Wall -Wextra -O2
-LDFLAGS = -L/opt/homebrew/lib -lboost_thread -lboost_json -lpthread -larmadillo -v
+# Homebrew paths for include and library files
+# Adjust these paths if you have a different installation
+# or if you are using a different package manager
+INCLUDE = -I/opt/homebrew/include
+LIBRARY = -L/opt/homebrew/lib
+# Adjust the CXXFLAGS and LDFLAGS as per your system's configuration
+CXXFLAGS = -std=c++17 $(INCLUDE) -Wall -Wextra -O2
+LDFLAGS = $(LIBRARY) -lboost_thread -lboost_json -lpthread -larmadillo -v
 
 SRC_DIR = .
 BUILD_DIR = build
 BIN = TechTrackAPI.out
-SRCS = $(wildcard Server/*.cpp Handlers/*/*.cpp Models/*/*.cpp main.cpp)
+SRCS = $(wildcard Server/*.cpp Handlers/*/*.cpp Models/*/*.cpp  Prediction/*/*.cpp  main.cpp)
 OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
 $(BIN): $(OBJS)
