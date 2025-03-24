@@ -6,15 +6,11 @@ class Solver{
  public:
         explicit Solver(const arma::dmat& data);
         ~Solver();
-        arma::vec Solve(int max_iterations, double tolerance);
+        arma::cx_mat Solve();
 
  private:
         arma::dmat data_;
-        arma::dmat J_;
-        arma::dvec residuals_;
-        arma::dvec coeff_;
-
-        void ComputeJacobian(const arma::dvec& coeff);
-        void ComputeResiduals(const arma::dvec& coeff);
+        arma::cx_mat coeff_;
+        arma::cx_mat FourierSolve();
 };
 #endif  // TECH_TRACK_API_MODELS_NLLS_SOLVER_H_

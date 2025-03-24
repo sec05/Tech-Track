@@ -13,8 +13,8 @@
 
 #include "../../Server/HTTPSession.h"
 #include "../Data/DummyDataHandler.h"
-#include "../../Prediction/NLLS/Predictor.h"
-#include "../../Prediction/NLLS/DummyDataGenerator.h"
+#include "../../Prediction/LS/Predictor.h"
+#include "../../Prediction/LS/DummyDataGenerator.h"
 #include "../../Prediction/LSTM/Network.h"
 
 namespace beast = boost::beast;
