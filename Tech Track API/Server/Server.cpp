@@ -9,21 +9,36 @@
 #include <string>
 
 Server::Server(boost::asio::io_context* io_context, unsigned short port, std::string config_file)
-    : acceptor_(*io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)) {
-    ReadConfig(config_file);
-    DoAccept();
-}
+    : acceptor_(*io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)), 
+      ssl_context_(boost::asio::ssl::context::tlsv12_server) {  // Initialize SSL context
+        ssl_context_.set_options(
+            boost::asio::ssl::context::default_workarounds |
+            boost::asio::ssl::context::no_sslv2 |
+            boost::asio::ssl::context::no_sslv3 |
+            boost::asio::ssl::context::single_dh_use);
+    
+        ssl_context_.use_certificate_chain_file("cert.pem"); // Change to your cert path
+        ssl_context_.use_private_key_file("key.pem", boost::asio::ssl::context::pem);
+        ssl_context_.set_verify_mode(boost::asio::ssl::verify_none);
 
-void Server::DoAccept() {
-    acceptor_.async_accept(
-        [this](boost::system::error_code ec, boost::asio::ip::tcp::socket socket) {
-            if (!ec) {
-                std::make_shared<HTTPSession>
-                (std::move(socket), valid_technologies_, valid_companies_)->Run();
-            }
-            DoAccept();
-        });
-}
+        ReadConfig(config_file);
+        DoAccept();
+    }
+
+    void Server::DoAccept() {
+        acceptor_.async_accept(
+            [this](boost::system::error_code ec, boost::asio::ip::tcp::socket socket) {
+                if (!ec) {
+                    // Create SSL stream
+                    auto ssl_stream = boost::asio::ssl::stream<boost::beast::tcp_stream>(std::move(socket), ssl_context_);
+    
+                    // Pass SSL stream to HTTPSession
+                    std::make_shared<HTTPSession>(std::move(ssl_stream), valid_technologies_, valid_companies_)->Run();
+                }
+                DoAccept();
+            });
+    }
+    
 
 void Server::ReadConfig(std::string filename) {
     std::ifstream file(filename);

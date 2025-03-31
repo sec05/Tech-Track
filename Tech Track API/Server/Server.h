@@ -14,6 +14,7 @@ class Server {
  private:
     void DoAccept();
     void ReadConfig(std::string filename);
+    boost::asio::ssl::context ssl_context_;
     boost::asio::ip::tcp::acceptor acceptor_;
     std::vector<std::string> valid_technologies_;
     std::vector<std::string> valid_companies_;

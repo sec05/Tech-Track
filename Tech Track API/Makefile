@@ -10,7 +10,7 @@ INCLUDE = -I/opt/homebrew/include
 LIBRARY = -L/opt/homebrew/lib
 # Adjust the CXXFLAGS and LDFLAGS as per your system's configuration
 CXXFLAGS = -std=c++17 $(INCLUDE) -Wall -Wextra -O2
-LDFLAGS = $(LIBRARY) -lboost_thread -lboost_json -lpthread -larmadillo -v
+LDFLAGS = $(LIBRARY) -lboost_thread -lboost_json -lssl -lcrypto -lpthread -lboost_system -larmadillo -v
 
 SRC_DIR = .
 BUILD_DIR = build

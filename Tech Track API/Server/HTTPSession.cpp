@@ -9,23 +9,35 @@
 
 #include "../Handlers/Requests/DataRequestHandler.h"
 
-HTTPSession::HTTPSession(tcp::socket socket, std::vector<std::string> valid_technologies,
+HTTPSession::HTTPSession(boost::asio::ssl::stream<boost::beast::tcp_stream> stream, std::vector<std::string> valid_technologies,
     std::vector<std::string> valid_companies)
-    : socket_(std::move(socket)), valid_technologies_(valid_technologies),
+    : stream_(std::move(stream)), valid_technologies_(valid_technologies),
     valid_companies_(valid_companies) {
     valid_companies_.push_back("all");
 }
 
 void HTTPSession::Run() {
     // Start reading the HTTP request from the client.
-    DoRead();
+    DoHandshake();
+}
+
+void HTTPSession::DoHandshake() {
+    auto self = shared_from_this();
+    stream_.async_handshake(boost::asio::ssl::stream_base::server, 
+        [this, self](boost::beast::error_code ec) {
+            if (!ec) {
+                DoRead();
+            } else {
+                std::cerr << "SSL Handshake failed: " << ec.message() << std::endl;
+            }
+        });
 }
 
 void HTTPSession::DoRead() {
     auto self = shared_from_this();
 
     // Asynchronously read the HTTP request from the socket into req_.
-    http::async_read(socket_, buffer_, req_,
+    http::async_read(stream_, buffer_, req_,
         [this, self](beast::error_code ec, std::size_t bytes_transferred){
             boost::ignore_unused(bytes_transferred);
             if (!ec) {
