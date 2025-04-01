@@ -9,7 +9,7 @@ CXX = g++
 INCLUDE = -I/opt/homebrew/include
 LIBRARY = -L/opt/homebrew/lib
 # Adjust the CXXFLAGS and LDFLAGS as per your system's configuration
-CXXFLAGS = -std=c++17 $(INCLUDE) -Wall -Wextra -O2
+CXXFLAGS = -std=c++17 $(INCLUDE) -Wall -Wextra -O2 -g
 LDFLAGS = $(LIBRARY) -lboost_thread -lboost_json -lssl -lcrypto -lpthread -lboost_system -larmadillo -v
 
 SRC_DIR = .

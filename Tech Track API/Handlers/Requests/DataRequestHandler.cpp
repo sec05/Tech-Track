@@ -26,7 +26,7 @@ DataRequestHandler::DataRequestHandler(http::request<http::string_body> &&req, s
     : RequestHandler(std::move(req), std::move(session)), res_(nullptr), company_(""), technology_("")
 {
  ParseRequest();
- res_ = new http::response<http::string_body>(http::status::ok, GetRequest().version());
+ res_ = std::make_unique<http::response<http::string_body>>(http::status::ok, GetRequest().version());
 }
 
 DataRequestHandler::~DataRequestHandler()

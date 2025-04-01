@@ -27,7 +27,7 @@ class DataRequestHandler : public RequestHandler {
  private:
     std::string technology_;
     std::string company_;
-    http::response<http::string_body>* res_;
+    std::unique_ptr<http::response<http::string_body>> res_;
 };
 
 #endif  // TECH_TRACK_API_HANDLERS_REQUESTS_DATAREQUESTHANDLER_H_
