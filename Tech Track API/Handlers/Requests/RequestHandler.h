@@ -20,7 +20,7 @@ class RequestHandler
 public:
    RequestHandler(http::request<http::string_body> &&req, std::shared_ptr<HTTPSession> session);
    virtual ~RequestHandler();
-   virtual http::response<http::string_body> *HandleRequest();
+   virtual std::unique_ptr<http::response<http::string_body>> HandleRequest();
    virtual void ParseRequest();
    http::request<http::string_body> GetRequest() { return req_; }
    std::shared_ptr<HTTPSession> GetSession() { return session_; }

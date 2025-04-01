@@ -31,16 +31,12 @@ DataRequestHandler::DataRequestHandler(http::request<http::string_body> &&req, s
 
 DataRequestHandler::~DataRequestHandler()
 {
-   if (res_ != nullptr)
-    {
-        delete res_;
-    }
     res_ = nullptr;
     company_ = "";
     technology_ = "";
 }
 
-http::response<http::string_body> *DataRequestHandler::HandleRequest()
+std::unique_ptr<http::response<http::string_body>> DataRequestHandler::HandleRequest()
 {
     DummyDataHandler data_handler(10, 2);
     boost::json::object response_json;
@@ -82,7 +78,7 @@ http::response<http::string_body> *DataRequestHandler::HandleRequest()
 
     res_->prepare_payload();
 
-    return res_;
+    return std::move(res_);
 }
 
 void DataRequestHandler::ParseRequest()

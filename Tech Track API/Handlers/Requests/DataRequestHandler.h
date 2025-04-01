@@ -21,7 +21,7 @@ class DataRequestHandler : public RequestHandler {
     DataRequestHandler
         (http::request<http::string_body>&& req, std::shared_ptr<HTTPSession> session);
     ~DataRequestHandler() override;
-    http::response<http::string_body>* HandleRequest() override;
+    std::unique_ptr<http::response<http::string_body>> HandleRequest() override;
 
     void ParseRequest() override;
  private:
