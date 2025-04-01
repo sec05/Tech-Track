@@ -77,7 +77,7 @@ std::unique_ptr<http::response<http::string_body>> DataRequestHandler::HandleReq
     res_->body() = body;
 
     res_->prepare_payload();
-
+    std::cout << "Got to here 4"<< std::endl;
     return std::move(res_);
 }
 

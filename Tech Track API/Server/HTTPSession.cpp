@@ -99,9 +99,10 @@ void HTTPSession::HandleRequest() {
         // now pass off to the request to the data request handler
         DataRequestHandler handler = DataRequestHandler(std::move(req_), shared_from_this());
 
-        http::response<http::string_body>* res = handler.HandleRequest();
+        std::unique_ptr<http::response<http::string_body>> res = handler.HandleRequest();
 
-        DoWrite(std::move(*res));
+        DoWrite(std::move(res));
+        std::cout << "Response sent" << std::endl;
         return;
     }
     SendBadRequest("Unknown request");

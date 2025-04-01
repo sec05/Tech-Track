@@ -55,12 +55,13 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
 
     // Asynchronously write the response.
     // This is a template so it can handle different response types.
-    template <typename Response> void DoWrite(Response&& res) {
+    template <typename Response> 
+void DoWrite(Response&& res) {
     auto self = shared_from_this();
     // Keep the response alive until async_write is complete.
     auto sp = std::make_shared<typename std::decay<Response>::type>(std::forward<Response>(res));
 
-    http::async_write(stream_, *sp,
+    http::async_write(stream_, std::move(*sp),
         [this, self, sp](beast::error_code ec, std::size_t bytes_transferred) {
             boost::ignore_unused(bytes_transferred);
             if (ec) {
@@ -77,6 +78,7 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
                 });
         });
 }
+
 
 };
 
