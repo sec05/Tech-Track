@@ -61,20 +61,19 @@ function SearchBar({ selectedTech, setSelectedTech, selectedYear, setSelectedYea
   return (
     <Card sx={{ p: 2, mb: 3, bgcolor: "white", color: "black" }}>
       <CardContent>
-      <Select
-  value={selectedTech}
-  onChange={(e) => setSelectedTech(e.target.value)}
-  displayEmpty
-  fullWidth
-  sx={{
-    bgcolor: "white",
-    borderRadius: "5px",
-    color: "black",
-    mb: 2,
-    border: "2px solid black", // <-- bold black border
-  }}
->
-
+        <Select
+          value={selectedTech}
+          onChange={(e) => setSelectedTech(e.target.value)}
+          displayEmpty
+          fullWidth
+          sx={{
+            bgcolor: "white",
+            borderRadius: "5px",
+            color: "black",
+            mb: 2,
+            border: "2px solid black",
+          }}
+        >
           <MenuItem value="" disabled>Select a Technology</MenuItem>
           {techOptions.map((tech) => (
             <MenuItem key={tech} value={tech}>{tech}</MenuItem>
@@ -82,19 +81,18 @@ function SearchBar({ selectedTech, setSelectedTech, selectedYear, setSelectedYea
         </Select>
 
         <Box sx={{ display: "flex", gap: 1 }}>
-        <Select
-  value={selectedYear}
-  onChange={(e) => setSelectedYear(e.target.value)}
-  displayEmpty
-  fullWidth
-  sx={{
-    bgcolor: "white",
-    borderRadius: "5px",
-    color: "black",
-    border: "2px solid black", // <-- same here
-  }}
->
-
+          <Select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            displayEmpty
+            fullWidth
+            sx={{
+              bgcolor: "white",
+              borderRadius: "5px",
+              color: "black",
+              border: "2px solid black",
+            }}
+          >
             <MenuItem value="" disabled>Select Year</MenuItem>
             {data.map((entry) => (
               <MenuItem key={entry.year} value={entry.year}>{entry.year}</MenuItem>
@@ -114,7 +112,6 @@ function SearchBar({ selectedTech, setSelectedTech, selectedYear, setSelectedYea
     </Card>
   );
 }
-
 
 // TechChart Component
 function TechChart() {
@@ -159,7 +156,6 @@ function Features() {
   );
 }
 
-
 // Main App Component with Routing
 function App() {
   return (
@@ -169,31 +165,6 @@ function App() {
         <Route path="/features" element={<Features />} />
       </Routes>
     </Router>
-  );
-}
-
-export default App;
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
   );
 }
 
