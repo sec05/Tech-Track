@@ -27,7 +27,7 @@ function TopTrends() {
   const randomTrend = trends[Math.floor(Math.random() * trends.length)];
 
   return (
-    <Card sx={{ mb: 3, bgcolor: "black", color: "yellow" }}>
+    <Card sx={{ mb: 2, bgcolor: "black", color: "yellow" }}>
       <CardContent>
         <Typography variant="h6">Today's Top Trend</Typography>
         <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
@@ -59,7 +59,16 @@ function Home() {
 // SearchBar Component
 function SearchBar({ selectedTech, setSelectedTech, selectedYear, setSelectedYear, onSearch }) {
   return (
-    <Card sx={{ p: 2, mb: 3, bgcolor: "white", color: "black" }}>
+    <Card
+      sx={{
+        bgcolor: "white",
+        color: "black",
+        borderRadius: "10px",
+        mt: 3,
+        mb: 3, // added bottom margin to create space between the cards
+      }}
+    >
+      
       <CardContent>
         <Select
           value={selectedTech}
@@ -71,7 +80,7 @@ function SearchBar({ selectedTech, setSelectedTech, selectedYear, setSelectedYea
             borderRadius: "5px",
             color: "black",
             mb: 2,
-            border: "2px solid black",
+            // removed border line here
           }}
         >
           <MenuItem value="" disabled>Select a Technology</MenuItem>
@@ -90,7 +99,7 @@ function SearchBar({ selectedTech, setSelectedTech, selectedYear, setSelectedYea
               bgcolor: "white",
               borderRadius: "5px",
               color: "black",
-              border: "2px solid black",
+              // removed border line here as well
             }}
           >
             <MenuItem value="" disabled>Select Year</MenuItem>
@@ -116,7 +125,16 @@ function SearchBar({ selectedTech, setSelectedTech, selectedYear, setSelectedYea
 // TechChart Component
 function TechChart() {
   return (
-    <Card sx={{ bgcolor: "white", color: "black" }}>
+    <Card
+      sx={{
+        p: 2,
+        mb: 3,
+        bgcolor: "white",
+        color: "black",
+        border: "2px solid black", // added border
+        borderRadius: "10px",
+      }}
+    >
       <CardContent>
         <Typography variant="h6" gutterBottom>Technology Trend Analysis</Typography>
         <ResponsiveContainer width="100%" height={350}>
@@ -142,7 +160,19 @@ function Features() {
 
   return (
     <div style={{ maxWidth: "600px", margin: "auto", padding: "20px", background: "#ffffff", color: "black" }}>
-      <Typography variant="h4" gutterBottom sx={{ color: "black" }}>Tech Track App</Typography>
+      <Typography 
+        variant="h4" 
+        gutterBottom 
+        sx={{ 
+          color: "black", 
+          textAlign: "center", 
+          fontWeight: 'bold', 
+        }}
+      >
+       Tech Track 
+        <span style={{ fontSize: "0.3em", fontWeight: "normal" }}>®</span> {/* Registered Trademark symbol */}
+
+      </Typography>
       <TopTrends />
       <SearchBar
         selectedTech={selectedTech}
@@ -156,7 +186,8 @@ function Features() {
   );
 }
 
-// Main App Component with Routing
+
+// App Component
 function App() {
   return (
     <Router>
@@ -164,6 +195,40 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/features" element={<Features />} />
       </Routes>
+
+      {/* Fun Tech Track Footer */}
+      <Box
+        sx={{
+          mt: 4,
+          height: "80px",
+          width: "100%",
+          position: "relative",
+          backgroundColor: "black",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            width: "80%",
+            height: "4px",
+            backgroundColor: "yellow",
+            borderRadius: "2px",
+          }}
+        ></Box>
+
+        <img
+          src="https://media.tenor.com/EJQvxUMk__MAAAAj/runner.gif"
+          alt="Running Guy"
+          style={{
+            position: "absolute",
+            bottom: "52px",
+            left: "50%",
+            height: "60px",
+          }}
+        />
+      </Box>
     </Router>
   );
 }
