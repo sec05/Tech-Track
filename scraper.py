@@ -1,35 +1,48 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 from github import Github
+from collections import defaultdict
+from datetime import datetime
 
-# create a Flask application
 scraper = Flask(__name__)
-CORS(scraper, supports_credentials=True) # enable CORS for all routes
+CORS(scraper, supports_credentials=True)
 
-# define route for collecting GitHub data
 @scraper.route('/github', methods=['GET', 'POST'])
 @cross_origin()
-def github():
-    # create a Github instance using a personal access token
-    g = Github("")
-    # sort by trending repositories
-    # will max out at 1000
-    treningRepos = g.search_repositories(query="stars:>1000", sort="stars", order="desc")
-    # create a list of file extensions to filter
-    fileExtensions = [".py", ".java", ".c", ".cc", ".cpp",".h",".hpp",".js",".html",".css",".go",".rb",".php"]
-    # make a dictionary to store the data
-    data = {}
-    for repo in treningRepos:
-        # collect all commits for the repositories
-        for commit in repo.get_commits():
-            # get when commit was added to repo
-            commit_date = commit.commit.author.date
-            # if the file parsed has an extension in the list, store it in the database
-            for file in commit.files:
-                if file.filename.endswith(tuple(fileExtensions)):
-                    data.update({commit_date: {file.filename: file.changes}})
+def github_route():
+    g = Github("your_github_token_here")  # Replace with your actual token
 
-# nested dictionary: dates as keys, technology and count as values
+    trending_repos = g.search_repositories(query="stars:>1000", sort="stars", order="desc")
+
+    file_extensions = {
+        ".py": "python", ".java": "java", ".c": "c", ".cc": "c++", ".cpp": "c++",
+        ".h": "c++", ".hpp": "c++", ".js": "javascript", ".html": "html", ".css": "css",
+        ".go": "go", ".rb": "ruby", ".php": "php"
+    }
+    language_list = list(set(file_extensions.values()))
+
+    result = defaultdict(lambda: defaultdict(int))
+
+    for repo in trending_repos[:1]:
+        try:
+            for commit in repo.get_commits()[:5]:
+                commit_date = commit.commit.author.date.date().isoformat()
+
+                # Ensure every language is initialized to 0
+                for lang in language_list:
+                    result[commit_date][lang] += 0  # Ensures presence without affecting real counts
+
+                try:
+                    for file in commit.files:
+                        for ext, lang in file_extensions.items():
+                            if file.filename.endswith(ext):
+                                result[commit_date][lang] += 1
+                except Exception:
+                    continue
+        except Exception:
+            continue
+
+    return jsonify(result)
 
 if __name__ == "__main__":
     scraper.run(port=5555, debug=True)
