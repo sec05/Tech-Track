@@ -3,6 +3,9 @@ from flask_cors import CORS, cross_origin
 from github import Github
 from collections import defaultdict
 from datetime import datetime
+from pytrends.request import TrendReq
+import pandas as pd
+import math
 
 scraper = Flask(__name__)
 CORS(scraper, supports_credentials=True)
@@ -37,6 +40,29 @@ def github_route():
                         for ext, lang in file_extensions.items():
                             if file.filename.endswith(ext):
                                 result[commit_date][lang] += 1
+                except Exception:
+                    continue
+        except Exception:
+            continue
+
+    return jsonify(result)
+
+@scraper.route('/google', methods=['GET', 'POST'])
+@cross_origin()
+def google_route():
+    trends = TrendReq(hl='en-US', tz=360)
+    language_list = ["python", "java", "c", "c++", "javascript", "html", "css", "go", "ruby", "php"]
+    result = defaultdict(lambda: defaultdict(int))
+    for lang in language_list:
+        try:
+            trends.build_payload(kw_list=[lang], timeframe='today 1-week')
+            data = trends.interest_over_time()
+            data = data.reset_index()
+            data['date'] = data['date'].dt.date
+            for index, row in data.iterrows():
+                try:
+                    date_str = row['date'].isoformat()
+                    result[date_str][lang] += row[lang]
                 except Exception:
                     continue
         except Exception:
