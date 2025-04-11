@@ -48,10 +48,6 @@ df["year"] = pd.to_datetime(df["created"]).dt.year
 # Group by year + language
 yearly_trends = df.groupby(["year", "language"]).size().unstack(fill_value=0)
 
-# Optional: print or save
-#print("\nYearly trend data (Reddit keyword mentions):\n")
-#print(yearly_trends)
-
 # View individual language trend
 choice = input("\nEnter a programming language to see its yearly trend (or press Enter to skip): ").strip().lower()
 if choice and choice in yearly_trends.columns:
