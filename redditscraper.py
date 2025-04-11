@@ -57,6 +57,4 @@ choice = input("\nEnter a programming language to see its yearly trend (or press
 if choice and choice in yearly_trends.columns:
     print(f"\nYearly trend for '{choice}':\n")
     print(yearly_trends[[choice]])
-elif choice:
-    print(f"\n'{choice}' not found in the trend data.")
 
