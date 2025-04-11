@@ -6,6 +6,9 @@ from datetime import datetime
 from pytrends.request import TrendReq
 import pandas as pd
 import math
+import praw
+from datetime import timezone
+from time import sleep
 
 scraper = Flask(__name__)
 CORS(scraper, supports_credentials=True)
@@ -55,6 +58,7 @@ def google_route():
     result = defaultdict(lambda: defaultdict(int))
 
     for lang in language_list:
+        sleep(5)
         try:
             trends.build_payload(kw_list=[lang], timeframe='now 7-d')
             data = trends.interest_over_time()
@@ -68,7 +72,7 @@ def google_route():
             for index, row in data.iterrows():
                 date_str = row['date'].isoformat()
                 result[date_str][lang] += int(row.get(lang, 0))
-
+            result[date_str][lang] //= 100  # Normalize
         except Exception as e:
             print(f"[ERROR] Failed to process keyword '{lang}': {e}")
             continue
@@ -76,6 +80,34 @@ def google_route():
     # Convert defaultdict to dict for jsonify compatibility
     result_dict = {date: dict(lang_data) for date, lang_data in result.items()}
     return jsonify(result_dict), 200
+
+@scraper.route('/reddit', methods=['GET', 'POST'])
+@cross_origin()
+def reddit_route():
+    languages = ["python", "java", "c", "c++", "javascript", "html", "css", "go", "ruby", "php"]
+    subreddits = ["programming", "learnprogramming", "coding", "webdev", "cscareerquestions"]
+
+    reddit = praw.Reddit(
+        client_id='NzcF0c9Poew9iox42RPZxQ',
+        client_secret='XcdcnQ9ZiiL2yb9rH2fWmm-HX6lqSQ',
+        user_agent='Tech Track by u/TechTrack2025'
+    )
+
+    result = defaultdict(lambda: defaultdict(int))
+
+    for lang in languages:
+        for sub in subreddits:
+            try:
+                for post in reddit.subreddit(sub).search(lang, time_filter='week', sort='new', limit=10):
+                    created_date = datetime.fromtimestamp(post.created_utc, tz=timezone.utc).date().isoformat()
+                    result[created_date][lang] += 1
+            except Exception as e:
+                print(f"[ERROR] r/{sub}, lang={lang} → {e}")
+                continue
+
+    # Convert nested defaultdicts to dicts
+    final_result = {date: dict(lang_data) for date, lang_data in result.items()}
+    return jsonify(final_result), 200
 
 if __name__ == "__main__":
     scraper.run(port=5555, debug=True)
