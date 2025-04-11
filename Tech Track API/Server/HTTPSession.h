@@ -44,7 +44,7 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
     void DoRead();          // Read HTTP request
     void HandleRequest();   // Handle request → build response
     void SendBadRequest(const std::string& why);
-
+    void AddCORSHeaders(http::response<http::string_body>& res);
     bool IsValidTechnology(std::string technology);
     bool IsValidCompany(std::string company);
 

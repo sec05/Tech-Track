@@ -37,8 +37,20 @@ void HTTPSession::DoRead() {
         });
 }
 
+void HTTPSession::AddCORSHeaders(http::response<http::string_body>& res) {
+    res.set(http::field::access_control_allow_origin, "*");
+    res.set(http::field::access_control_allow_methods, "GET, OPTIONS");
+    res.set(http::field::access_control_allow_headers, "Content-Type");
+}
+
 void HTTPSession::HandleRequest() {
-    if (req_.method() != http::verb::get) {
+    if (req_.method() == http::verb::options) {
+        http::response<http::string_body> res{ http::status::ok, req_.version() };
+        AddCORSHeaders(res);
+        res.prepare_payload();
+        DoWrite(std::move(res));
+        return;
+    } else if (req_.method() != http::verb::get) {
         SendBadRequest("Unsupported HTTP-method");
         return;
     }
@@ -84,7 +96,7 @@ void HTTPSession::HandleRequest() {
 
     DataRequestHandler handler(std::move(req_), shared_from_this());
     auto res = handler.HandleRequest();
-
+    AddCORSHeaders(res);
     DoWrite(std::move(res));
     std::cout << "Response sent" << std::endl;
 }
@@ -94,6 +106,7 @@ void HTTPSession::SendBadRequest(const std::string& why) {
     res.set(http::field::content_type, "text/plain");
     res.keep_alive(req_.keep_alive());
     res.body() = why;
+    AddCORSHeaders(res);
     res.prepare_payload();
     DoWrite(std::move(res));
 }
