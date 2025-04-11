@@ -1,5 +1,9 @@
 import praw
 import pandas as pd
+from datetime import datetime
+from datetime import timezone
+
+
 
 scraper = Flask(__name__)
 CORS(scraper, supports_credentials=True)
@@ -9,35 +13,50 @@ CORS(scraper, supports_credentials=True)
 def reddit_route():
     g = Reddit("your_reddit_token_here")
 
-# Authenticate
+
+# Reddit API setup 
 reddit = praw.Reddit(
-    client_id="NzcF0c9Poew9iox42RPZxQ",
-    client_secret="XcdcnQ9ZiiL2yb9rH2fWmm-HX6lqSQ",
-    user_agent="Tech_Track by u/TechTrack2025"
+    client_id='NzcF0c9Poew9iox42RPZxQ',
+    client_secret='XcdcnQ9ZiiL2yb9rH2fWmm-HX6lqSQ',
+    user_agent='Tech Track by u/TechTrack2025'
 )
 
-# Search posts by keyword:
-for submission in reddit.subreddit("all").search("machine learning", limit=10):
-    print(submission.title)
+# Keywords and subreddits to search
+languages = ["python", "java", "c", "c++", "javascript", "html", "css", "go", "ruby", "php"]
+subreddits = ["programming", "learnprogramming", "coding", "webdev", "cscareerquestions"]
 
+# Data collection
+print("Fetching data from Reddit...")
+data = []
 
-# Scrape and save top posts from r/technology to a CSV for trend prediction
-post_data = []
-for post in reddit.subreddit("technology").top(time_filter="month", limit=100):
-    print(f"Fetching post: {post.title}")  # Debugging line
-    post_data.append({
-        "title": post.title,
-        "score": post.score,
-        "created": post.created_utc,
-        "num_comments": post.num_comments
-    })
+for lang in languages:
+    for sub in subreddits:
+        try:
+            for post in reddit.subreddit(sub).search(lang, time_filter='year', sort='new', limit=200):
+                data.append({
+                    "language": lang.lower(),
+                    "subreddit": sub,
+                    "created": datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
+                })
+        except Exception as e:
+            print(f"Error with r/{sub} on '{lang}': {e}")
 
-# Check if any posts were fetched
-if not post_data:
-    print("No posts were fetched. Please check the subreddit or parameters.")
+# Convert to DataFrame
+df = pd.DataFrame(data)
+df["year"] = pd.to_datetime(df["created"]).dt.year
 
-# Convert to DataFrame and save to CSV
-df = pd.DataFrame(post_data)
-df.to_csv("reddit_tech_posts.csv", index=False)
+# Group by year + language
+yearly_trends = df.groupby(["year", "language"]).size().unstack(fill_value=0)
 
-print("Scraping complete. Saved to 'reddit_tech_posts.csv'.")
+# Optional: print or save
+#print("\nYearly trend data (Reddit keyword mentions):\n")
+#print(yearly_trends)
+
+# View individual language trend
+choice = input("\nEnter a programming language to see its yearly trend (or press Enter to skip): ").strip().lower()
+if choice and choice in yearly_trends.columns:
+    print(f"\nYearly trend for '{choice}':\n")
+    print(yearly_trends[[choice]])
+elif choice:
+    print(f"\n'{choice}' not found in the trend data.")
+
