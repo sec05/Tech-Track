@@ -9,7 +9,7 @@
 int main() {
     try {
         boost::asio::io_context* io_context =  new boost::asio::io_context;
-        Server server(io_context, 443, "config");
+        Server server(io_context, 80, "config");
         io_context->run();
     }
     catch (std::exception& e) {

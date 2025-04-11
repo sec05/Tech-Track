@@ -8,13 +8,15 @@
 #include <vector>
 
 #include <boost/asio.hpp>
+
 class Server {
  public:
     Server(boost::asio::io_context* io_context, unsigned short port, std::string config_file);
+
  private:
     void DoAccept();
     void ReadConfig(std::string filename);
-    boost::asio::ssl::context ssl_context_;
+
     boost::asio::ip::tcp::acceptor acceptor_;
     std::vector<std::string> valid_technologies_;
     std::vector<std::string> valid_companies_;

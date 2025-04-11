@@ -21,13 +21,13 @@ class DataRequestHandler : public RequestHandler {
     DataRequestHandler
         (http::request<http::string_body>&& req, std::shared_ptr<HTTPSession> session);
     ~DataRequestHandler() override;
-    std::unique_ptr<http::response<http::string_body>> HandleRequest() override;
+    http::response<http::string_body> HandleRequest() override;
 
     void ParseRequest() override;
  private:
     std::string technology_;
     std::string company_;
-    std::unique_ptr<http::response<http::string_body>> res_;
+    http::response<http::string_body> res_;
 };
 
 #endif  // TECH_TRACK_API_HANDLERS_REQUESTS_DATAREQUESTHANDLER_H_

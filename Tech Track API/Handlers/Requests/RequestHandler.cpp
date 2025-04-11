@@ -13,8 +13,8 @@ RequestHandler::RequestHandler
 RequestHandler::~RequestHandler() {
 }
 
-http::response<http::string_body>* RequestHandler::HandleRequest() {
-    return nullptr;
+http::response<http::string_body> RequestHandler::HandleRequest() {
+    return *res_;
 }
 
 void RequestHandler::ParseRequest() {
