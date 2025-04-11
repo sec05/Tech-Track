@@ -13,7 +13,7 @@ CORS(scraper, supports_credentials=True)
 @scraper.route('/github', methods=['GET', 'POST'])
 @cross_origin()
 def github_route():
-    g = Github("your_github_token_here")  # Replace with your actual token
+    g = Github("")  # Replace with your actual token
 
     trending_repos = g.search_repositories(query="stars:>1000", sort="stars", order="desc")
 
@@ -26,9 +26,9 @@ def github_route():
 
     result = defaultdict(lambda: defaultdict(int))
 
-    for repo in trending_repos[:1]:
+    for repo in trending_repos[:10]:
         try:
-            for commit in repo.get_commits()[:5]:
+            for commit in repo.get_commits()[:100]:
                 commit_date = commit.commit.author.date.date().isoformat()
 
                 # Ensure every language is initialized to 0
@@ -53,22 +53,29 @@ def google_route():
     trends = TrendReq(hl='en-US', tz=360)
     language_list = ["python", "java", "c", "c++", "javascript", "html", "css", "go", "ruby", "php"]
     result = defaultdict(lambda: defaultdict(int))
+
     for lang in language_list:
         try:
-            trends.build_payload(kw_list=[lang], timeframe='today 1-week')
+            trends.build_payload(kw_list=[lang], timeframe='now 7-d')
             data = trends.interest_over_time()
+
+            if data.empty or 'isPartial' not in data.columns:
+                continue  # Skip if no data
+
             data = data.reset_index()
             data['date'] = data['date'].dt.date
+
             for index, row in data.iterrows():
-                try:
-                    date_str = row['date'].isoformat()
-                    result[date_str][lang] += row[lang]
-                except Exception:
-                    continue
-        except Exception:
+                date_str = row['date'].isoformat()
+                result[date_str][lang] += int(row.get(lang, 0))
+
+        except Exception as e:
+            print(f"[ERROR] Failed to process keyword '{lang}': {e}")
             continue
 
-    return jsonify(result)
+    # Convert defaultdict to dict for jsonify compatibility
+    result_dict = {date: dict(lang_data) for date, lang_data in result.items()}
+    return jsonify(result_dict), 200
 
 if __name__ == "__main__":
     scraper.run(port=5555, debug=True)
