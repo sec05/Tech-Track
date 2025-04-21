@@ -29,8 +29,9 @@ class HTTPSession : public std::enable_shared_from_this<HTTPSession> {
                 std::vector<std::string> valid_companies);
 
     void Run();
-    std::string GetCompany() const { return company_; }
-    std::string GetTechnology() const { return technology_; }
+    virtual ~HTTPSession() = default;
+    virtual std::string GetCompany() const { return company_; }
+    virtual std::string GetTechnology() const { return technology_; }
 
  private:
     boost::beast::tcp_stream stream_;

@@ -7,8 +7,8 @@
 #include "DataHandler.h"
 
 class DummyDataHandler : public DataHandler{
-    private:
-        arma::mat data_;
+ private:
+    arma::mat data_;
  public:
     DummyDataHandler(int m, int n);
     ~DummyDataHandler() override;

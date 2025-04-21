@@ -1,10 +1,13 @@
+// Copyright 2025 Spencer Evans-Cole
+
 #include "LSTM.h"
 #include <iostream>
+#include <vector>
+#include <utility>
 
 LSTM::LSTM(int input_size, int hidden_size, int output_steps, double lr)
     : input_size(input_size), hidden_size(hidden_size),
     output_steps(output_steps), lr(lr) {
-
     arma::arma_rng::set_seed_random();
 
     Wf = arma::randn(hidden_size, input_size);

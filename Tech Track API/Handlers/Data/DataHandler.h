@@ -6,10 +6,10 @@
 #include <vector>
 #include <string>
 struct PollingCube {
-   arma::cube data;                              // shape: [techs x endpoints x dates]
-   std::vector<std::string> tech_labels;         // row labels
-   std::vector<std::string> endpoint_labels;     // column labels
-   std::vector<std::string> date_labels;         // slice labels
+arma::cube data;                              // shape: [techs x endpoints x dates]
+std::vector<std::string> tech_labels;         // row labels
+std::vector<std::string> endpoint_labels;     // column labels
+std::vector<std::string> date_labels;         // slice labels
 };
 class DataHandler{
  private:

@@ -14,10 +14,11 @@ Server::Server(boost::asio::io_context* io_context, unsigned short port, std::st
     : acceptor_(*io_context, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)) {
 
     ReadConfig(config_file);
-    HttpPoller::instance({"http://localhost:5555/github", 
+    HttpPoller::instance({"http://localhost:5555/github",
         "http://localhost:5555/reddit", "http://localhost:5555/google"}, 3600).start();
-    DataHandler handler(10,4);
-    //LSTMDriver::init(handler.FillRandomPollingCube(10,4,7).data.slice(0), 20, 5, 50, 100, 0.01, 0.7);
+    DataHandler handler(10, 4);
+    LSTMDriver::init(handler.FillRandomPollingCube(10, 4, 50).data.slice(0),
+    20, 5, 50, 100, 0.01, 0.7);
     DoAccept();
 }
 

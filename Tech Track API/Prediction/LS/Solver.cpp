@@ -18,10 +18,7 @@ arma::cx_mat Solver::Solve() {
 }
 
 arma::cx_mat Solver::FourierSolve() {
-    // Perform a Fourier transform on the data
-    // This is a placeholder for the actual Fourier transform logic
-    // In practice, you would use an appropriate library or algorithm to compute the Fourier coefficients
-    arma::cx_mat coeff = arma::fft(data_, data_.n_elem); // Perform FFT along the first dimension
+    arma::cx_mat coeff = arma::fft(data_, data_.n_elem);  // Perform FFT along the first dimension
     return coeff;
 }
 

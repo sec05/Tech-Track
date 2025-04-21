@@ -24,7 +24,7 @@ arma::mat DummyDataGenerator::GenerateSinusoidalDataMultipleCompanies(
     data.col(0) = data_.col(0);
     for (int i = 0; i < num_companies; ++i) {
         arma::vec noise = arma::randn<arma::vec>(numberPoints_) * stddev + mean;
-        data.col(i+1) += 
+        data.col(i+1) +=
         a * arma::sin(b * data.col(0) + i) + c * arma::cos(d * data.col(0) + i) + noise;
     }
     return data;

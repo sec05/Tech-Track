@@ -1,4 +1,7 @@
-#pragma once
+// Copyright 2025 Spencer Evans-Cole
+
+#ifndef TECH_TRACK_API_HANDLERS_DATA_HTTPPOLLER_H_
+#define TECH_TRACK_API_HANDLERS_DATA_HTTPPOLLER_H_
 
 #include <string>
 #include <vector>
@@ -9,7 +12,7 @@
 #include <boost/asio.hpp>
 
 class HttpPoller {
-public:
+ public:
     // Singleton accessor
     static HttpPoller& instance(const std::vector<std::string>& urls = {}, int interval_sec = 10);
 
@@ -19,9 +22,11 @@ public:
 
     // Safe access to response data
     std::unordered_map<std::string, std::string> getResponsesCopy();
-    void withResponses(const std::function<void(const std::unordered_map<std::string, std::string>&)>& visitor);
+    void withResponses(const std::function<void(const std::unordered_map<std::string,
+        std::string>&)>& visitor);
+    bool completed() const { return completed_polls; }
 
-private:
+ private:
     // Private constructor for singleton
     HttpPoller(const std::vector<std::string>& urls, int interval_sec);
 
@@ -42,4 +47,7 @@ private:
     boost::asio::steady_timer timer;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;
     std::thread io_thread;
+    bool completed_polls = false;
 };
+
+#endif  // TECH_TRACK_API_HANDLERS_DATA_HTTPPOLLER_H_

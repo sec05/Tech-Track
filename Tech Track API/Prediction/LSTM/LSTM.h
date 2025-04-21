@@ -1,16 +1,20 @@
-#ifndef LSTM_H_
-#define LSTM_H_
+// Copyright 2025 Spencer Evans-Cole
+
+#ifndef TECH_TRACK_API_PREDICTION_LSTM_LSTM_H_
+#define TECH_TRACK_API_PREDICTION_LSTM_LSTM_H_
 
 #include <armadillo>
+#include <vector>
+#include <utility>
 
 class LSTM {
-public:
+ public:
     LSTM(int input_size, int hidden_size, int output_steps, double lr);
 
     void train(const arma::cube& X, const arma::cube& Y, int epochs);
     arma::mat predict(const arma::mat& input_seq);
 
-private:
+ private:
     int input_size, hidden_size, output_steps;
     double lr;
 
@@ -39,4 +43,4 @@ private:
                   const arma::mat& y_pred);
 };
 
-#endif
+#endif  //  TECH_TRACK_API_PREDICTION_LSTM_LSTM_H_

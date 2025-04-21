@@ -1,10 +1,15 @@
+// Copyright 2025 Spencer Evans-Cole
+
 #include "HttpPoller.h"
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <string>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <iostream>
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -17,7 +22,8 @@ HttpPoller& HttpPoller::instance(const std::vector<std::string>& urls, int inter
 }
 
 HttpPoller::HttpPoller(const std::vector<std::string>& urls, int interval_sec)
-    : endpoints(urls), interval(interval_sec), timer(io_context), work_guard(net::make_work_guard(io_context)) {
+    : endpoints(urls), interval(interval_sec), timer(io_context),
+    work_guard(net::make_work_guard(io_context)) {
     io_thread = std::thread([this]() { io_context.run(); });
 }
 
@@ -35,7 +41,8 @@ std::unordered_map<std::string, std::string> HttpPoller::getResponsesCopy() {
     return responses;
 }
 
-void HttpPoller::withResponses(const std::function<void(const std::unordered_map<std::string, std::string>&)>& visitor) {
+void HttpPoller::withResponses(const std::function<void(const std::unordered_map<std::string,
+    std::string>&)>& visitor) {
     std::lock_guard<std::mutex> lock(data_mutex);
     visitor(responses);
 }
@@ -86,10 +93,10 @@ void HttpPoller::poll_all() {
                     std::lock_guard<std::mutex> lock(data_mutex);
                     responses[url] = res.body();
                 }
-
             } catch (const std::exception& e) {
                 std::cerr << "[ERROR] Failed to GET " << url << ": " << e.what() << std::endl;
             }
         }).detach();
     }
+    completed_polls = true;
 }

@@ -3,11 +3,12 @@
 #include "DataHandler.h"
 
 #include <armadillo>
-#include <armadillo>
 #include <vector>
 #include <string>
 #include <unordered_map>
 #include <set>
+#include <iostream>
+#include <utility>
 #include <boost/json.hpp>
 #include "HttpPoller.h"
 
@@ -19,8 +20,8 @@ PollingCube GetDataFromPolling() {
     std::set<std::string> all_techs;
     std::set<std::string> all_dates;
     std::vector<std::string> endpoints;
-    std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, double>>> full_data;
-    //                 ^ endpoint      ^ date        ^ tech         ^ count
+    std::unordered_map<std::string, std::unordered_map<std::string,
+     std::unordered_map<std::string, double>>> full_data;
 
     HttpPoller::instance().withResponses([&](const auto& responses) {
         for (const auto& [endpoint, body] : responses) {
@@ -42,7 +43,8 @@ PollingCube GetDataFromPolling() {
                     }
                 }
             } catch (const std::exception& e) {
-                std::cerr << "[WARN] Failed to parse JSON from " << endpoint << ": " << e.what() << "\n";
+                std::cerr << "[WARN] Failed to parse JSON from " << endpoint << ": "
+                 << e.what() << "\n";
             }
         }
     });
@@ -79,7 +81,6 @@ PollingCube GetDataFromPolling() {
 
 DataHandler::DataHandler(int m, int n) {
     data_cube_ = FillRandomPollingCube(m, n, 10);
-    
 }
 
 DataHandler::~DataHandler() {
@@ -89,7 +90,8 @@ PollingCube DataHandler::GetDataFromPolling() {
     return ::GetDataFromPolling();
 }
 
-PollingCube DataHandler::FillRandomPollingCube(size_t num_techs, size_t num_endpoints, size_t num_dates) {
+PollingCube DataHandler::FillRandomPollingCube(size_t num_techs,
+    size_t num_endpoints, size_t num_dates) {
     using namespace arma;
 
     cube data(num_techs, num_endpoints, num_dates);
@@ -115,6 +117,13 @@ PollingCube DataHandler::FillRandomPollingCube(size_t num_techs, size_t num_endp
 }
 
 arma::mat DataHandler::GetMatrixByDateAndTech() {
+    if (HttpPoller::instance().completed()) {
+        data_cube_ = GetDataFromPolling();
+    } else {
+        data_cube_ = FillRandomPollingCube(10, 10, 10);
+    }
+
+     // Get the dimensions
     size_t num_techs = data_cube_.tech_labels.size();
     size_t num_dates = data_cube_.date_labels.size();
     size_t num_endpoints = data_cube_.endpoint_labels.size();
@@ -134,13 +143,22 @@ arma::mat DataHandler::GetMatrixByDateAndTech() {
     return result;
 }
 
-arma::vec DataHandler::GetDataByEndpointAndTech(const std::string& endpoint, const std::string& tech) {
-    size_t endpoint_idx = std::distance(data_cube_.endpoint_labels.begin(), 
-                                        std::find(data_cube_.endpoint_labels.begin(), data_cube_.endpoint_labels.end(), endpoint));
-    size_t tech_idx = std::distance(data_cube_.tech_labels.begin(), 
-                                    std::find(data_cube_.tech_labels.begin(), data_cube_.tech_labels.end(), tech));
+arma::vec DataHandler::GetDataByEndpointAndTech(const std::string& endpoint,
+    const std::string& tech) {
+    if (HttpPoller::instance().completed()) {
+        data_cube_ = GetDataFromPolling();
+    } else {
+        data_cube_ = FillRandomPollingCube(10, 10, 10);
+    }
+    size_t endpoint_idx = std::distance(data_cube_.endpoint_labels.begin(),
+                                        std::find(data_cube_.endpoint_labels.begin(),
+                                        data_cube_.endpoint_labels.end(), endpoint));
+    size_t tech_idx = std::distance(data_cube_.tech_labels.begin(),
+                                    std::find(data_cube_.tech_labels.begin(),
+                                    data_cube_.tech_labels.end(), tech));
 
-    if (endpoint_idx >= data_cube_.endpoint_labels.size() || tech_idx >= data_cube_.tech_labels.size()) {
+    if (endpoint_idx >= data_cube_.endpoint_labels.size() ||
+    tech_idx >= data_cube_.tech_labels.size()) {
         tech_idx = 0;
         endpoint_idx = 0;
     }
